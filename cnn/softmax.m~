@@ -14,9 +14,18 @@ classdef softmax < handle
         end
         
         function data_f = forward(obj, data)
-            amax = max(data(:));
-            esum = exp(data(:) - amax);
+            data = data(:);
+            amax = max(data);
+            esum = 0;
+            es = zeros(length(data),1);
+            for i=1:length(data)
+                es(i) = exp(data(i) - amax);
+                esum = esum + es(i);
+            end
+            data_f = es/esum;
         end
+        
+        function obj = backward(
 
     end
     

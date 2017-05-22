@@ -6,8 +6,8 @@ classdef conv_layer < handle
         w;            % convolution weights
         b;            % convolution bias
         in_size;      % input size
-        filter_size;  % filter size (i,j)
         out_size;     % output_size (i,j,k)
+        filter_size;  % filter size (i,j)
     end
     
     methods

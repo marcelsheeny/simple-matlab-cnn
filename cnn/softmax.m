@@ -5,6 +5,7 @@ classdef softmax < handle
     properties
         in_size;
         out_size;
+        curr_data;
     end
     
     methods
@@ -14,12 +15,17 @@ classdef softmax < handle
         end
         
         function data_f = forward(obj, data)
-            amax = max(data(:));
-            es = exp(data(:) - amax);
-            esum = sum(es);
+            obj.curr_data = data(:);
+            amax = max(obj.curr_data);
+            esum = 0;
+            es = zeros(length(obj.curr_data),1);
+            for i=1:length(obj.curr_data)
+                es(i) = exp(obj.curr_data(i) - amax);
+                esum = esum + es(i);
+            end
             data_f = es/esum;
         end
-
+        
     end
     
 end
