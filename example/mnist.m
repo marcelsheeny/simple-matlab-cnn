@@ -33,7 +33,7 @@ labels = loadMNISTLabels('train-labels-idx1-ubyte');
 
 im = reshape(images(:,1), 28, 28 );
 
-model = network();
+model = neural_network();
 model.add_layer('type','input', 'size', [28, 28, 1]);
 model.add_layer('type','conv','filters',16,'size',[3,3]);
 model.add_layer('type','relu');

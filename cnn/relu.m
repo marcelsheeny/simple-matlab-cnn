@@ -16,6 +16,10 @@ classdef relu < handle
         function data_f = forward(obj, data)
             data_f = max(0, data);
         end
+        
+        function data_b = backward(obj, grad)
+            data_b = grad > 0;
+        end
 
     end
     

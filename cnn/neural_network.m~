@@ -1,4 +1,4 @@
-classdef network < handle
+classdef neural_network < handle
     %NETWORK Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -37,6 +37,44 @@ classdef network < handle
             for i=1:length(obj.layers)
                 data = obj.layers{i}.forward(data); 
             end
+        end
+        
+        function backward(obj, err)
+            for i=length(obj.layers):-1:1
+                obj.layers{i}.backward(err); 
+            end
+        end
+        
+        function train(obj, epochs, batch, data, labels, val_percentage, epoch_val)
+           [trainInd,valInd,~] = dividerand(data,1 - val_percent,val_percentage,0);
+           train_data = data(:,:,trainInd);
+           train_labels = labels(trainInd);
+           val_data = data(:,:,valInd);
+           val_labels = labels(valInd);
+           curr_batch = 1;
+           max_label = max(labels(:));
+           for i=1:epochs
+               if (i == mod(epochs, epoch_val)
+                   for v=1:length(valInd)
+
+                       f = obj.forward(data(:,:,b));
+                       truth = zeros(max_label,1);
+                       truth(labels(b)) = 1;
+                       err = err + sum(abs(f - truth));
+                   end
+               else
+                   for b=curr_batch:curr_batch+batch
+                       if (b < size(data,3)
+                           f = obj.forward(data(:,:,b));
+                           truth = zeros(max_label,1);
+                           truth(labels(b)) = 1;
+                           err = err + sum(abs(f - truth));
+                       end
+                       curr_batch = b;
+                       obj.backward(err);
+                   end
+               end
+           end
         end
     end
     

@@ -6,6 +6,7 @@ classdef softmax < handle
         in_size;
         out_size;
         curr_data;
+        w;
     end
     
     methods
@@ -24,6 +25,7 @@ classdef softmax < handle
                 esum = esum + es(i);
             end
             data_f = es/esum;
+            
         end
         
     end
