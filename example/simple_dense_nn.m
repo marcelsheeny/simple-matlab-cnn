@@ -47,5 +47,6 @@ epochs = 1000;
 batch = 30;
 val_percentage = 0.2;
 epoch_val = 50;
+l_r = 0.001;
 
-[err_train, err_val] = model.train(epochs, batch, train_data, train_labels, val_percentage, epoch_val);
+[err_train, err_val] = model.train(epochs, batch, l_r, train_data, train_labels, val_percentage, epoch_val);

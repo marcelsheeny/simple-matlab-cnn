@@ -40,13 +40,17 @@ classdef neural_network < handle
         end
         
         function backward(obj, err)
-            for i=length(obj.layers):-1:1
-                obj.layers{i}.backward(err); 
+            last_layer = length(obj.layers);
+            grad = obj.layers{last_layer}.backward(err);
+            for i=last_layer-1:-1:1
+                grad = obj.layers{i}.backward(grad); 
             end
         end
         
-        function train(obj, epochs, batch, data, labels, val_percentage, epoch_val)
-           [trainInd,valInd,~] = dividerand(data,1 - val_percent,val_percentage,0);
+        function [all_err_train, all_err_val] = train(obj, epochs, l_r, batch, data, labels, val_percent, epoch_val)
+           [trainInd,valInd,~] = dividerand(data,1 - val_percent,val_percent,0);
+           all_err_train = [];
+           all_err_val = [];
            train_data = data(:,:,trainInd);
            train_labels = labels(trainInd);
            val_data = data(:,:,valInd);
@@ -54,24 +58,40 @@ classdef neural_network < handle
            curr_batch = 1;
            max_label = max(labels(:));
            for i=1:epochs
-               if (i == mod(epochs, epoch_val)
+               if (i == mod(epochs, epoch_val))
+                   err_val = 0;
                    for v=1:length(valInd)
-
-                       f = obj.forward(data(:,:,b));
+                       f = obj.forward(val_data(:,:,b));
                        truth = zeros(max_label,1);
-                       truth(labels(b)) = 1;
-                       err = err + sum(abs(f - truth));
+                       truth(val_labels(b)) = 1;
+                       err_val = err_val + sum(abs(f - truth));
                    end
+                   all_err_val(end+1,1) = err_val;
+                   err_train = 0;
+                   for v=1:length(trainInd)
+                       f = obj.forward(train_data(:,:,b));
+                       truth = zeros(max_label,1);
+                       truth(train_labels(b)) = 1;
+                       err_train = err_train + sum(abs(f - truth));
+                   end
+                   all_err_train(end+1,1) = err_val;
                else
+                   err = 0;
                    for b=curr_batch:curr_batch+batch
-                       if (b < size(data,3)
-                           f = obj.forward(data(:,:,b));
+                       if (b < size(data,3))
+                           f = obj.forward(train_data(:,:,b));
                            truth = zeros(max_label,1);
-                           truth(labels(b)) = 1;
+                           truth(train_labels(b)) = 1;
                            err = err + sum(abs(f - truth));
                        end
                        curr_batch = b;
                        obj.backward(err);
+                       
+                       %update weights
+                       last_layer = length(obj.layers);
+                       for i=last_layer-1:-1:1
+                           obj.layers{i}.w = obj.layers{i}.w + l_r;
+                       end
                    end
                end
            end

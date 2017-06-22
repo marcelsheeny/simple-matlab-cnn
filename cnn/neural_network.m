@@ -47,13 +47,13 @@ classdef neural_network < handle
             end
         end
         
-        function [all_err_train, all_err_val] = train(obj, epochs, batch, data, labels, val_percent, epoch_val)
-           [trainInd,valInd,~] = dividerand(data,1 - val_percent,val_percent,0);
+        function [all_err_train, all_err_val] = train(obj, epochs, l_r, batch, data, labels, val_percent, epoch_val)
+           [trainInd,valInd,~] = dividerand(size(data,1),1 - val_percent,val_percent,0);
            all_err_train = [];
            all_err_val = [];
-           train_data = data(:,:,trainInd);
+           train_data = data(trainInd,:,:);
            train_labels = labels(trainInd);
-           val_data = data(:,:,valInd);
+           val_data = data(valInd,:,:);
            val_labels = labels(valInd);
            curr_batch = 1;
            max_label = max(labels(:));
@@ -78,7 +78,7 @@ classdef neural_network < handle
                else
                    err = 0;
                    for b=curr_batch:curr_batch+batch
-                       if (b < size(data,3))
+                       if (b < size(data,1))
                            f = obj.forward(train_data(:,:,b));
                            truth = zeros(max_label,1);
                            truth(train_labels(b)) = 1;
@@ -86,6 +86,12 @@ classdef neural_network < handle
                        end
                        curr_batch = b;
                        obj.backward(err);
+                       
+                       %update weights
+                       last_layer = length(obj.layers);
+                       for l=last_layer-1:-1:1
+                           obj.layers{l}.w = obj.layers{l}.w + l_r*obj.layers{l}.grad;
+                       end
                    end
                end
            end
