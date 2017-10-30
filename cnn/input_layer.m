@@ -5,6 +5,7 @@ classdef input_layer < handle
     properties
         in_size;
         out_size;
+        data_out;
     end
     
     methods
@@ -14,6 +15,11 @@ classdef input_layer < handle
         end
         
         function out = forward(obj, data)
+            out = data;
+            obj.data_out = data;
+        end
+        
+        function out = backward(obj, data)
             out = data;
         end
     end

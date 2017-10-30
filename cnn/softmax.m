@@ -6,7 +6,8 @@ classdef softmax < handle
         in_size;
         out_size;
         curr_data;
-        w;
+        grad;
+        data_out;
     end
     
     methods
@@ -24,8 +25,14 @@ classdef softmax < handle
                 es(i) = exp(obj.curr_data(i) - amax);
                 esum = esum + es(i);
             end
-            data_f = es/esum;
+            obj.data_out = es/esum;
+            data_f = obj.data_out;
             
+        end
+        
+        function out = backward(obj, grad)
+            obj.grad = grad;
+            out = grad;
         end
         
     end

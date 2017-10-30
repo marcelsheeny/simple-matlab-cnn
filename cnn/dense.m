@@ -6,6 +6,7 @@ classdef dense < handle
         out_size;
         w;
         grad;
+        data_out;
     end
     
     methods
@@ -16,14 +17,18 @@ classdef dense < handle
         end
         
         function data_f = forward(obj, data)
-            data_f = zeros(obj.out_size,1);
+            obj.data_out = zeros(obj.out_size,1);
             for i=1:obj.out_size
-                data_f(i,1) = dot(obj.w(:,i), data(:));
+                obj.data_out(i,1) = dot(obj.w(:,i), data(:));
             end
+            data_f = obj.data_out;
         end
         
-        function backward(obj, grad)
-            obj.grad = obj.w*grad;
+        function out = backward(obj, err, data_out)
+            obj.grad = (data_out > 0);
+            prop_err = obj.w *  err;
+            out = prop_err .* obj.grad;
+            obj.grad = out;
         end
 
     end

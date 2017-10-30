@@ -6,6 +6,7 @@ classdef relu < handle
         in_size;
         out_size;
         grad;
+        data_out;
     end
     
     methods
@@ -15,11 +16,14 @@ classdef relu < handle
         end
         
         function data_f = forward(obj, data)
-            data_f = max(0, data);
+            % obj.w = data;
+            obj.data_out = max(0, data);
+            data_f = obj.data_out;
         end
         
-        function backward(obj, grad)
-            obj.grad = grad > 0;
+        function out = backward(obj, grad, data_out)
+            out = grad;
+            obj.grad = grad;
         end
 
     end

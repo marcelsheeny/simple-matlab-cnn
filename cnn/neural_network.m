@@ -40,10 +40,11 @@ classdef neural_network < handle
         end
         
         function backward(obj, err)
-            last_layer = length(obj.layers);
-            grad = obj.layers{last_layer}.backward(err);
-            for i=last_layer-1:-1:1
-                grad = obj.layers{i}.backward(grad); 
+            last_layer = length(obj.layers) - 1;
+            grad = err;
+            % grad = obj.layers{last_layer}.backward(err);
+            for i=last_layer:-1:2
+                grad = obj.layers{i}.backward(grad, obj.layers{i - 1}.data_out); 
             end
         end
         
@@ -52,49 +53,63 @@ classdef neural_network < handle
            all_err_train = [];
            all_err_val = [];
            train_data = data(trainInd,:,:);
-           train_labels = labels(trainInd);
+           train_labels = labels(trainInd, :);
            val_data = data(valInd,:,:);
-           val_labels = labels(valInd);
+           val_labels = labels(valInd, :);
            curr_batch = 1;
-           max_label = max(labels(:));
+
            for i=1:epochs
-               if (i == mod(epochs, epoch_val))
+               if (mod(i, epoch_val) == 0)
                    err_val = 0;
                    for v=1:length(valInd)
-                       f = obj.forward(val_data(:,:,b));
-                       truth = zeros(max_label,1);
-                       truth(val_labels(b)) = 1;
-                       err_val = err_val + sum(abs(f - truth));
+                       f = obj.forward(val_data(v,:,:));
+                       truth = val_labels(v, :)';
+                       err_val = err_val + (sum(abs(f - truth)) / length(valInd));
                    end
                    all_err_val(end+1,1) = err_val;
                    err_train = 0;
                    for v=1:length(trainInd)
-                       f = obj.forward(train_data(:,:,b));
-                       truth = zeros(max_label,1);
-                       truth(train_labels(b)) = 1;
+                       f = obj.forward(train_data(v,:,:));
+                       truth = train_labels(v, :)';
                        err_train = err_train + sum(abs(f - truth));
                    end
                    all_err_train(end+1,1) = err_val;
                else
                    err = 0;
-                   for b=curr_batch:curr_batch+batch
-                       if (b < size(data,1))
-                           f = obj.forward(train_data(:,:,b));
-                           truth = zeros(max_label,1);
-                           truth(train_labels(b)) = 1;
-                           err = err + sum(abs(f - truth));
+                   for b=curr_batch:(curr_batch+batch)
+                       if (b < size(train_data,1))
+                           f = obj.forward(train_data(b,:,:)');
+                           truth = train_labels(b, :)';
+                           err = err + (abs(f - truth) / batch);
                        end
-                       curr_batch = b;
-                       obj.backward(err);
-                       
+                   end
+                   curr_batch = b;
+                   obj.backward(err);
+                   if (b < size(train_data,1))
                        %update weights
                        last_layer = length(obj.layers);
-                       for l=last_layer-1:-1:1
-                           obj.layers{l}.w = obj.layers{l}.w + l_r*obj.layers{l}.grad;
+                       for l=last_layer-1:-1:2
+                           if (isprop(obj.layers{l}, 'w'))
+                               obj.layers{l}.w = obj.layers{l}.w - l_r*obj.layers{l}.grad;
+                           end
                        end
                    end
                end
            end
+        end
+        
+        function [fs, acc] = test(obj, data, labels)
+            fs = [];
+            for v=1:size(data,1)
+                f = obj.forward(data(v,:,:));
+                [~,max_i] = max(f);
+                temp = zeros(1,2);
+                temp(1, max_i) = 1;
+                f = temp;
+                fs = [fs; f];
+            end
+            temp = fs == labels;
+            acc = sum(temp(:,1)) / size(fs,1);
         end
     end
     

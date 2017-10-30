@@ -8,7 +8,7 @@ classdef sigmoid < handle
     end
     
     methods
-        function obj = relu(in_size)
+        function obj = sigmoid(in_size)
             obj.in_size = in_size;
             obj.out_size = in_size;
         end
